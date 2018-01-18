@@ -1,0 +1,318 @@
+package com.example.casper.deneme_choose;
+
+import android.app.Activity;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.text.Layout;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.crash.FirebaseCrash;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class MainActivity extends AppCompatActivity {
+
+
+    private FirebaseDatabase data = FirebaseDatabase.getInstance();
+    private FirebaseAuth fa = FirebaseAuth.getInstance();
+    FirebaseUser us = fa.getCurrentUser();
+    String id;
+    DatabaseReference ref = data.getReference();
+
+
+    EditText alinan;
+    TextView tv;
+
+    Button b1, b2, b3, b4, b5;
+
+    int[] yazi = {0};   //(ekran için) yapılacak iş sayısı
+    int[] sayi = {0};   //checkbox sayısı
+
+    final CheckBox[] cb = new CheckBox[100];    //Checkboxların bulunduğu dizi
+
+
+    List<String> krk = new ArrayList<String>();
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        FirebaseCrash.report(new Exception("My first Android non-fatal error"));
+        FirebaseCrash.log("MainActivity started");
+
+        id = us.getUid();
+        final ViewGroup layout = (ViewGroup) findViewById(R.id.layout_2);  //ana sayfa
+
+
+        final ScrollView sv = new ScrollView(this);  //sayfanın aşağı-yukarı kaydırabilmesi sağlanır
+
+        layout.addView(sv);
+        final LinearLayout l1 = new LinearLayout(this); //liste tanımladık
+        sv.addView(l1);
+        l1.setOrientation(LinearLayout.VERTICAL);  //listenin dikey sıralanmasını sağladık
+
+
+
+
+
+        alinan = (EditText) findViewById(R.id.editText);
+
+        tv = (TextView) findViewById(R.id.textView);
+
+
+        b1 = (Button) findViewById(R.id.button);
+
+        b2 = (Button) findViewById(R.id.button2);
+
+        b3 = (Button) findViewById(R.id.button3);
+
+        b4 = (Button) findViewById(R.id.button4);
+
+        b5 = (Button) findViewById(R.id.button5);
+
+
+        final CheckBox[] del = new CheckBox[100];    //Checkboxların silme tuşunun bulunduğu dizi
+
+
+        final CheckBox[] yedek = new CheckBox[100];     //Silme işlevinde döngüyü sağlar
+
+        final List<String> ck = new ArrayList<String>();   //Checkboxların string ifadeleri bu dizide tutulur
+
+
+        b4.setOnClickListener(new View.OnClickListener() {  //Hepsini göster
+            @Override
+            public void onClick(View view) {
+                for (int i = 0; i < sayi[0]; i++) {
+                    cb[i].setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+
+        b3.setOnClickListener(new View.OnClickListener() {   //yapılmış işler
+            @Override
+            public void onClick(View view) {
+                for (int i = 0; i < sayi[0]; i++) {
+                    if (cb[i].isChecked()) {
+                        cb[i].setVisibility(View.VISIBLE);
+                    } else cb[i].setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+
+        b2.setOnClickListener(new View.OnClickListener() {  //Yapılacak işler
+            @Override
+            public void onClick(View view) {
+                for (int i = 0; i < sayi[0]; i++) {
+                    if (cb[i].isChecked()) {
+
+                        cb[i].setVisibility(View.INVISIBLE);
+
+                    } else cb[i].setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+
+        b1.setOnClickListener(new View.OnClickListener() { //Checkbox oluşturma
+
+            @Override
+            public void onClick(View view) {
+
+//Checkbox metinlerini diziye ekleme
+
+             //         cb[sayi[0]]=( new CheckBox(view.getContext()));  //checkbox oluşturuldu
+//ck.add(new CheckBox(view.getContext()));
+
+
+                ck.add(String.valueOf(alinan.getText()));  //Checkboxa girilen metin yazıldı
+
+
+             //  l1.addView(cb[sayi[0]]);     //Checkbox ekrana eklendi
+
+
+                ref.child("id").setValue(ck);
+
+
+
+
+
+/*
+
+                //Silme tuşunun ekrandaki koordinatları için aşağıdaki yöntem ve parametreleri kullanıldı)
+                LinearLayout.LayoutParams lp =(LinearLayout.LayoutParams) new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                lp.gravity = Gravity.LEFT;
+                lp.setMargins(550,-65,30,30);
+
+                del[sayi[0]] = new CheckBox(view.getContext());    //Silme tuşu oluşturuldu
+*/
+                //    l1.addView(del[sayi[0]]);     //Silme tuşu ekrana eklendi
+
+                //  ck.add(cb[sayi[0]]);
+
+                //  ref.child(id).setValue(ck.get(sayi[0]));
+
+
+               sayi[0]++;
+
+                yazi[0]++;
+
+
+                tv.setText("Yapılacak iş sayısı: " + yazi[0]);
+
+
+            }
+        });
+
+
+        //veri değişikliğini kontrol etme
+     /*   ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                krk.add((String) dataSnapshot.getValue());  //veritabanındaki veriler krk adlı list dizisine aktarılır
+
+              /*  for(int h=0;h<krk.size();h++) {
+
+                    cb[h] = new CheckBox(MainActivity.this);
+                    cb[h].setText(krk.get(h));
+
+                    l1.addView(cb[h]); */
+
+       /*     }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });*/
+
+        ref.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+
+//lalayouta ekleme
+
+
+                krk.add((dataSnapshot.child("id").getValue()).toString());  //veritabanındaki veriler krk adlı list dizisine aktarılır
+
+                checkBoxOlustur();
+
+
+                    for (int h = 0; h < krk.size(); h++) {
+
+                        cb[h].setText(krk.get(h));
+
+                        l1.addView(cb[h]);
+                    }
+
+
+
+                //
+
+
+
+              // l1.addView(checkBoxOlustur(krk));
+                //   l1.addView((View) dataSnapshot.child(id).getValue((GenericTypeIndicator<Object>) ck);
+
+                // l1.addView((View) dataSnapshot.child("id").getValue());
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+        b5.setOnClickListener(new View.OnClickListener() {    //sil işlemi
+            @Override
+            public void onClick(View view) {
+
+                for (int j = 0; j < sayi[0]; j++) {
+
+
+                    if (del[j].isChecked() && (yedek[j] != del[j])) {
+
+
+                        yedek[j] = del[j];
+                        l1.removeView(cb[j]);
+                        l1.removeView(del[j]);
+
+
+                        yazi[0] = yazi[0] - 1;
+
+                        tv.setText("Yapılacak iş sayısı: " + (yazi[0]));
+
+                    }
+
+
+                }
+
+
+            }
+        });
+    }
+
+boolean b=false;
+    public boolean checkBoxOlustur() {
+
+       int z;
+
+        for (z = 0; z < krk.size(); z++)  cb[z] = new CheckBox(this);
+
+        return b=true;
+
+    }
+
+}
+
+
+
+
+
+
