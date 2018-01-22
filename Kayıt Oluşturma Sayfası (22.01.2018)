@@ -1,0 +1,104 @@
+package com.example.casper.deneme_choose;
+
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class Main3Activity extends AppCompatActivity {
+
+    EditText isim,soyİsim,eposta,sifre,sifreTekrar;
+    Button kayıtOlustur;
+
+
+    FirebaseDatabase data = FirebaseDatabase.getInstance();
+    FirebaseAuth fa = FirebaseAuth.getInstance();
+    FirebaseUser us = fa.getCurrentUser();
+    String id;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main3);
+
+        isim =(EditText) findViewById(R.id.editText4);
+        soyİsim = (EditText) findViewById(R.id.editText5);
+        eposta = (EditText) findViewById(R.id.editText6);
+        sifre = (EditText) findViewById(R.id.editText8);
+        sifreTekrar = (EditText) findViewById(R.id.editText7);
+
+        kayıtOlustur = (Button) findViewById(R.id.button8);
+
+
+
+
+        kayıtOlustur.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+
+
+                String ad = isim.getText().toString();
+                String soyAd = soyİsim.getText().toString();
+                String email = eposta.getText().toString();
+                String password = sifre.getText().toString();
+                String passwordAgain = sifreTekrar.getText().toString();
+
+
+
+                Map<String,String> kullaniciBilgileri = new HashMap<String, String>();
+
+                kullaniciBilgileri.put("name",ad);
+                kullaniciBilgileri.put("surname",soyAd);
+                kullaniciBilgileri.put("mail",email);
+                kullaniciBilgileri.put("pass",password);
+                kullaniciBilgileri.put("passagain",passwordAgain);
+
+                DatabaseReference ref = data.getReference().child("email");
+                ref.push().setValue(kullaniciBilgileri);
+
+
+
+                Task<AuthResult> authResultTask = fa.createUserWithEmailAndPassword(email,password).addOnCompleteListener(Main3Activity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+
+                            FirebaseUser user= fa.getCurrentUser();
+
+                            UserProfileChangeRequest veri = new UserProfileChangeRequest.Builder().setDisplayName("Takma").setPhotoUri(null).build();
+                            user.updateProfile(veri);
+                        }
+                        else{
+                            Log.e("Yeni kullanıcı hatası",task.getException().getMessage());  //hata mesajı
+                        }
+                    }
+                });
+            }
+        });
+
+
+
+
+
+
+
+
+    }
+}
+
+
