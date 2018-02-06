@@ -1,0 +1,275 @@
+package com.example.casper.news;
+
+import android.media.Image;
+import android.os.AsyncTask;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.support.v7.widget.CardView;
+import android.util.Log;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class MainActivity extends AppCompatActivity {
+
+
+
+
+    ListView listView;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+
+
+
+
+
+
+//        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        // setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+        CollapsingToolbarLayout collaps = (CollapsingToolbarLayout) findViewById(R.id.collapse_toolbar);
+
+        collaps.setTitle("Haberler");
+
+
+
+
+
+        new MainActivity.AsyncHttpTask().execute();
+
+
+    }
+
+
+
+
+    public class AsyncHttpTask extends AsyncTask<String, Void, List<String>> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+
+        int k = 0;
+        HttpURLConnection urlConnection = null;
+        String alinan;
+
+        List<String> title = new ArrayList<>();
+        String[] text;
+        TextView[] tview ;
+
+        CardView[] card ;
+
+
+
+        @Override
+        protected void onPostExecute(List<String> result) {    //Arka planda yapılan işlerden buraya veri gönderilir.  Buradan ekran arayüzünde değişiklik yapılır.
+            super.onPostExecute(result);
+
+            LinearLayout linearLayout = findViewById(R.id.linear);
+
+            TextView tv = findViewById(R.id.textView);
+
+            TextView tv2 = findViewById(R.id.textView2);
+
+            TextView tv3 = findViewById(R.id.textView3);
+
+            TextView tv4 = findViewById(R.id.textView4);
+
+            TextView tv5 = findViewById(R.id.textView5);
+
+            TextView tv6 = findViewById(R.id.textView6);
+
+            TextView tv7 = findViewById(R.id.textView7);
+
+            ImageView im1 = findViewById(R.id.imageView);
+
+            ImageView im2 = findViewById(R.id.imageView2);
+
+            ImageView im3 = findViewById(R.id.imageView3);
+
+            ImageView im4 = findViewById(R.id.imageView4);
+
+            ImageView im5 = findViewById(R.id.imageView5);
+
+            ImageView im6 = findViewById(R.id.imageView6);
+
+            ImageView im7 = findViewById(R.id.imageView7);
+
+            TextView[] textView = new TextView[title.size()];
+
+            CardView[] cardViews = new CardView[title.size()];
+
+            ImageView[] image = new ImageView[title.size()];
+
+           // List<String> receiveTitle = new ArrayList<>();
+
+
+            linearLayout.addView(new TextView(getApplicationContext()));
+
+
+            try {
+
+
+
+
+
+/*
+
+
+                tv.setText( title.get(0));
+
+                Picasso.with(getApplicationContext()).load(result.get(0)).into(im1);
+
+                tv2.setText(title.get(1));
+
+                Picasso.with(getApplicationContext()).load(result.get(1)).into(im2);
+
+                tv3.setText(title.get(2));
+
+                Picasso.with(getApplicationContext()).load(result.get(2)).into(im3);
+
+                tv4.setText(title.get(3));
+
+                Picasso.with(getApplicationContext()).load(result.get(3)).into(im4);
+
+                tv5.setText(title.get(4));
+
+                Picasso.with(getApplicationContext()).load(result.get(4)).into(im5);
+
+                tv6.setText(title.get(5));
+
+                Picasso.with(getApplicationContext()).load(result.get(5)).into(im6);
+
+                tv7.setText(title.get(6));
+
+                Picasso.with(getApplicationContext()).load(result.get(6)).into(im7);
+*/
+            }
+             finally {
+
+
+            }
+
+
+
+
+
+            Log.e("TAG", "Gelen veri yok");
+
+        }
+
+
+        @Override
+        protected List<String> doInBackground(String... urls) {   //Kullanıcı arayüzü etkilenmeden buradan arka plan işleri yapılır.
+
+            String result = "";
+
+
+            URL url = null;
+            try {
+                url = new URL("https://newsapi.org/v2/top-headlines?sources=google-news&apiKey=a2ac39d9b1f14fa8bc47b913f293fbf7");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                InputStream input = null;
+                input = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader read = new BufferedReader(new InputStreamReader(input));
+
+                String line = "";
+
+                StringBuffer sb = new StringBuffer();
+
+                while ((line = read.readLine()) != null) {
+
+                    sb.append(line + "\n");
+                }
+
+
+
+
+                result = sb.toString();
+
+
+                JSONObject article = new JSONObject(result);
+
+                JSONArray jsonArray = article.getJSONArray("articles");
+
+                List<String> list= new ArrayList<>();
+
+               List<String> image = new ArrayList<>();
+
+
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+
+
+
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+
+
+
+
+                    title.add(i,jsonObject.getString("title"));
+
+                    image.add(i,jsonObject.getString("urlToImage"));
+
+
+
+
+
+                }
+
+                list.addAll(image);
+
+                return list;
+
+
+
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+
+            return null;
+
+        }
+
+
+    }
+
+
+}
