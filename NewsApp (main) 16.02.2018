@@ -1,0 +1,372 @@
+package com.example.casper.news;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.opengl.Visibility;
+import android.os.AsyncTask;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.ListViewCompat;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity  {
+
+    CollapsingToolbarLayout collaps;
+     TextView text;
+    ViewPager viewPager;
+     String dataUrl;
+    ListView listView;
+    SlideAdapter slideAdapter;
+    knowledge knowledge;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        getSupportActionBar().hide();
+
+
+
+        dataUrl = "https://newsapi.org/v2/top-headlines?country=gb&apiKey=a2ac39d9b1f14fa8bc47b913f293fbf7";
+
+//        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+  //   setSupportActionBar(toolbar);
+
+      // getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+         collaps = (CollapsingToolbarLayout) findViewById(R.id.collapse_toolbar);
+
+        //  collaps.setCollapsedTitleTextColor(R.color.orange);
+        collaps.setExpandedTitleTextColor(ColorStateList.valueOf(Color.parseColor("#FFBF070A")));
+
+
+        collaps.setCollapsedTitleTextColor(Color.parseColor("#FFBF070A"));
+
+        viewPager = findViewById(R.id.viewPager);
+
+        slideAdapter = new SlideAdapter(this);
+
+        viewPager.setAdapter(slideAdapter);
+
+
+
+        collaps.setTitle("Actual");
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                new MainActivity.AsyncHttpTask().execute(dataUrl);
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+
+                switch (position){
+
+                    case 0: {
+                        dataUrl = "https://newsapi.org/v2/top-headlines?country=gb&apiKey=a2ac39d9b1f14fa8bc47b913f293fbf7";
+                        collaps.setExpandedTitleTextColor(ColorStateList.valueOf(Color.parseColor("#FFBF070A")));
+
+                        collaps.setCollapsedTitleTextColor(Color.parseColor("#FFBF070A"));
+                        collaps.setTitle("Actual");
+                        break;
+
+                    }
+                    case 1: {
+                        dataUrl = "https://newsapi.org/v2/top-headlines?country=gb&category=business&apiKey=a2ac39d9b1f14fa8bc47b913f293fbf7";
+                        collaps.setExpandedTitleTextColor(ColorStateList.valueOf(Color.parseColor("#FF7B7777")));
+
+                        collaps.setCollapsedTitleTextColor(Color.parseColor("#FF7B7777"));
+                        collaps.setTitle("Business");
+                        break;
+                    }
+
+                    case 2: {
+                        dataUrl = "https://newsapi.org/v2/top-headlines?country=gb&category=entertainment&apiKey=a2ac39d9b1f14fa8bc47b913f293fbf7";
+                        collaps.setExpandedTitleTextColor(ColorStateList.valueOf(Color.parseColor("#FFB437D7")));
+
+                        collaps.setCollapsedTitleTextColor(Color.parseColor("#FFB437D7"));
+                        collaps.setTitle("Entertainment");
+                        break;
+
+                    }
+                    case 3: {
+                        dataUrl = "https://newsapi.org/v2/top-headlines?country=gb&category=health&apiKey=a2ac39d9b1f14fa8bc47b913f293fbf7";
+                        collaps.setExpandedTitleTextColor(ColorStateList.valueOf(Color.parseColor("#FF49F7E0")));
+
+                        collaps.setCollapsedTitleTextColor(Color.parseColor("#FF49F7E0"));
+                        collaps.setTitle("Health");
+                        break;
+
+                    }
+
+                    case 4: {
+                        dataUrl = "https://newsapi.org/v2/top-headlines?country=gb&category=science&apiKey=a2ac39d9b1f14fa8bc47b913f293fbf7";
+                        collaps.setExpandedTitleTextColor(ColorStateList.valueOf(Color.parseColor("#FFFFCC40")));
+
+                        collaps.setCollapsedTitleTextColor(Color.parseColor("#FFFFCC40"));
+                        collaps.setTitle("Science");
+                        break;
+                    }
+
+                    case 5: {
+                        dataUrl = "https://newsapi.org/v2/top-headlines?country=gb&category=sports&apiKey=a2ac39d9b1f14fa8bc47b913f293fbf7";
+                        collaps.setExpandedTitleTextColor(ColorStateList.valueOf(Color.parseColor("#FF70DE0A")));
+
+                        collaps.setCollapsedTitleTextColor(Color.parseColor("#FF70DE0A"));
+                        collaps.setTitle("Sports");
+                        break;
+                    }
+
+                    case 6: {
+                        dataUrl = "https://newsapi.org/v2/top-headlines?country=gb&category=technology&apiKey=a2ac39d9b1f14fa8bc47b913f293fbf7";
+                        collaps.setExpandedTitleTextColor(ColorStateList.valueOf(Color.parseColor("#FF31A2F2")));
+
+                        collaps.setCollapsedTitleTextColor(Color.parseColor("#FF31A2F2"));
+                        collaps.setTitle("Technology");
+                        break;
+
+                    }
+                }
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+
+
+
+        new MainActivity.AsyncHttpTask().execute(dataUrl);
+
+    }
+
+
+
+
+    public class AsyncHttpTask extends AsyncTask<String, Void, List<String>> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        HttpURLConnection urlConnection = null;
+
+        List<String> title = new ArrayList<>();
+
+        ImageView image = findViewById(R.id.picture);
+        List<String> urlList= new ArrayList<>();
+
+        List<String> sourceNews = new ArrayList<>();
+
+        Adapter adapter;
+
+        @SuppressLint("ResourceAsColor")
+        @Override
+        protected void onPostExecute(List<String> result) {    //Arka planda yapılan işlerden buraya veri gönderilir.  Buradan ekran arayüzünde değişiklik yapılır.
+            super.onPostExecute(result);
+
+
+
+
+
+            TextView textView = findViewById(R.id.textView3);
+
+            TextView sourceName = findViewById(R.id.textView5);
+
+            ImageView borderImage = findViewById(R.id.borderImage);
+
+
+            RecyclerView recyclerView = findViewById(R.id.recycler);
+
+            recyclerView.setHasFixedSize(true);
+
+            LinearLayoutManager llm = new LinearLayoutManager(getApplicationContext());
+
+            llm.setOrientation(LinearLayoutManager.VERTICAL);
+
+            recyclerView.setLayoutManager(llm);
+
+
+
+
+
+
+            try {
+
+
+
+
+                Picasso.with(getApplicationContext()).load(result.get(0)).fit().into(image);
+
+
+
+                textView.setText(title.get(0));
+
+                sourceName.setText(sourceNews.get(0));
+
+
+
+
+
+
+
+                recyclerView.setAdapter( adapter);
+
+                viewPager.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent toy = new Intent(v.getContext(),WebPage.class);
+                        toy.putExtra("url",urlList.get(0));
+                        v.getContext().startActivity(toy);
+                    }
+                });
+
+
+
+            }
+             finally {
+                CollapsingToolbarLayout.LayoutParams coordinat = new CollapsingToolbarLayout.LayoutParams(4, 60);
+
+                coordinat.leftMargin = 43;
+
+                coordinat.topMargin = 722;
+
+                borderImage.setLayoutParams(coordinat);
+
+
+
+            }
+
+            Log.e("TAG", "Gelen veri yok");
+
+        }
+
+
+        @Override
+        protected List<String> doInBackground(String... urls) {   //Kullanıcı arayüzü etkilenmeden buradan arka plan işleri yapılır.
+
+            String result = "";
+
+
+            URL url = null;
+            try {
+                url = new URL(urls[0]);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                InputStream input = null;
+                input = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader read = new BufferedReader(new InputStreamReader(input));
+
+                String line = "";
+
+                StringBuffer sb = new StringBuffer();
+
+                while ((line = read.readLine()) != null) {
+
+                    sb.append(line + "\n");
+                }
+
+
+
+
+                result = sb.toString();
+
+
+                JSONObject article = new JSONObject(result);
+
+                JSONArray jsonArray = article.getJSONArray("articles");
+
+
+
+
+                List<String> picture = new ArrayList<>();
+
+
+                ArrayList<knowledge> know = new ArrayList<>();
+
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+
+
+
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+
+                    JSONObject source = new JSONObject(jsonObject.getString("source"));
+
+
+                    know.add(new knowledge(jsonObject.getString("title"),jsonObject.getString("urlToImage"),jsonObject.getString("url"),source.getString("name")));
+
+
+                    adapter = new Adapter(know);
+                    title.add(i,jsonObject.getString("title"));
+                    picture.add(i,jsonObject.getString("urlToImage"));
+                    urlList.add(i,jsonObject.getString("url"));
+                    sourceNews.add(i,source.getString("name"));
+
+
+
+
+                }
+
+
+             //   list.addAll(picture);
+
+                return picture;
+
+
+
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+
+            return null;
+
+        }
+
+
+    }
+
+
+
+
+}
